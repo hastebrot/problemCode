@@ -1,3 +1,5 @@
+Important Notes:
+
 (1) What we are trying to achieve?
 We are trying to display the sound as a dynamic waveform while recording with no visible delay for the naked eyes of the users.
 
