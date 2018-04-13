@@ -1,0 +1,70 @@
+  
+    double[] readAudioData(byte audioBytes[],AudioFormat format){
+     
+     
+      int audioData[]  = {};
+      if (format.getSampleSizeInBits() == 16) {
+                    int nlengthInSamples = audioBytes.length / 2;
+                    audioData = new int[nlengthInSamples];
+                    if (format.isBigEndian()) {
+                        for (int i = 0; i < nlengthInSamples; i++) {
+                            /* First byte is MSB (high order) */
+                            int MSB = (int) audioBytes[2 * i];
+                            /* Second byte is LSB (low order) */
+                            int LSB = (int) audioBytes[2 * i + 1];
+                            audioData[i] = MSB << 8 | (255 & LSB);
+                        }
+                    } else {
+                        for (int i = 0; i < nlengthInSamples; i++) {
+                            /* First byte is LSB (low order) */
+                            int LSB = (int) audioBytes[2 * i];
+                            /* Second byte is MSB (high order) */
+                            int MSB = (int) audioBytes[2 * i + 1];
+                            audioData[i] = MSB << 8 | (255 & LSB);
+                            
+                        }
+                        
+                //calculating the maximum and minimum amplitude 
+                           int maximum = audioData[0];   // start with the first value
+                           for (int m=1; m<audioData.length; m++) {
+                           if (audioData[m] > maximum) {
+                           maximum = audioData[m];   // new maximum
+                           
+                            }
+                        }
+                           
+                         
+                           int minimum = audioData[0];   // start with the first value
+                           for (int k=1; k<audioData.length; k++) {
+                           if (audioData[k] < minimum) {
+                           minimum = audioData[k];   // new maximum
+                           
+                            }
+                        }
+                           
+                            }
+                        }
+                                
+                                     
+                    else if (format.getSampleSizeInBits() == 8) {
+                    int nlengthInSamples = audioBytes.length;
+                    audioData = new int[nlengthInSamples];
+                    if (format.getEncoding().toString().startsWith("PCM_SIGN")) {
+                        for (int i = 0; i < audioBytes.length; i++) {
+                            audioData[i] = audioBytes[i];
+
+                        }
+                    } else {
+                        for (int i = 0; i < audioBytes.length; i++) {
+                            audioData[i] = audioBytes[i] - 128;
+
+                        }
+                    }
+                }
+      
+                    sigProc = new SignalProc();
+                    double[] audioDataNormalize1 = sigProc.normalize(sigProc.intToDouble(audioData), 1400);
+      
+      return audioDataNormalize1;
+ } /// readaudiodata method ends here
+ 

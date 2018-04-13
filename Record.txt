@@ -1,0 +1,120 @@
+          void record(ActionEvent event) throws UnsupportedAudioFileException, IOException, Exception
+             {  
+                 String currentDir = System.getProperty("user.dir");
+                       
+                       
+                       String cexedir = currentDir +"\\cexe\\";
+                        String cexedi=currentDir+"\\Icons\\";
+                     
+            
+         if(count%2==0){
+         
+        
+         count++;
+        
+         }
+         else
+         {
+         /////record stop////////////////    
+                  
+                   
+                   recordplot.stop();
+                   recordplot.suspend();
+                 
+                   cap.stop();
+                  
+                   String filename =cexedir+"record.wav";
+                  
+       //////////////end of record stop///////////////////////    
+                  
+				  
+                  count++;
+                  return;
+         }
+             
+               String filename=cexedir+"sahana_s1.wav";
+               AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(filename));
+               format= audioInputStream.getFormat();
+               float freq = format.getSampleRate();
+                       
+               cap.start();
+                     
+   
+   
+   /////////////////plot waveform while recording////////////////////////////////////////          
+  
+            XYChart.Series series = new XYChart.Series();
+         
+           lineChartForRecord.getData().clear();
+           lineChartForRecord.getData().add(series);
+        
+          Plotwave plot=new Plotwave();
+
+          Thread.sleep(1000);
+                  
+            recordplot=  new Thread (()-> {
+                     try{
+                    
+                     ///open this thread /
+                     int start=2;
+                     int lastV=0;
+                     int diff =0;
+                     int Checknumsamples=0;
+					 
+                     while(true)
+           {        
+                    capOut1 = cap.getcapout();
+                    byte audioBytes[] = capOut1.toByteArray();
+                    
+                    double[] samples = plot.readAudioData(audioBytes, format);
+                    
+                    Checknumsamples=samples.length; 
+                    
+                    double[] fpoints;
+                    int numsamples=0;
+                    
+                    diff = Checknumsamples - lastV;
+       
+                    
+                    
+                    if( Checknumsamples<5000)
+                {
+                    RamerDouglasPeuckerFilter rdpf = new RamerDouglasPeuckerFilter(0.01);
+                    fpoints= rdpf.filter(samples);
+                    numsamples=fpoints.length;
+                }
+                  else
+                    {  RamerDouglasPeuckerFilter rdpf1 = new RamerDouglasPeuckerFilter(0.3);
+                     fpoints= rdpf1.filter(samples);
+                     numsamples=fpoints.length;
+                    }
+                     
+                     for(int i=start;i<numsamples;i++)
+                    { 
+                        int finalI=i;  
+                       
+                        Platform.runLater(()->
+                        
+                        series.getData().add(new XYChart.Data<>(finalI/freq,fpoints[finalI])));
+                    }
+                    start= numsamples;
+                    
+                   
+                  
+                         
+                   Thread.sleep(50); 
+            
+   
+     
+          }
+                   }catch(InterruptedException e){
+                        
+                  });
+           recordplot.start();
+                  
+
+                 
+ /////////////////////////////end of the waveform ploting//////////////////////////////////               
+                 
+    
+           }
